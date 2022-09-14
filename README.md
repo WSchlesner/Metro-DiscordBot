@@ -1,4 +1,3 @@
-# Metro-DiscordBot
 # DayZ Admin Bot
 
 ## Self Hosting
