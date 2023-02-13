@@ -49,7 +49,7 @@ module.exports = class extends Command {
               { name: "12 hours", value: 12 * 60 * 60 * 1000 },
               { name: "1 day", value: 24 * 60 * 60 * 1000 },
               { name: "3 days", value: 3 * 24 * 60 * 60 * 1000 },
-              { name: "3 days", value: 5 * 24 * 60 * 60 * 1000 },
+              { name: "5 days", value: 5 * 24 * 60 * 60 * 1000 },
               { name: "1 week", value: 7 * 24 * 60 * 60 * 1000 },
               { name: "10 days", value: 10 * 24 * 60 * 60 * 1000 }
             )
