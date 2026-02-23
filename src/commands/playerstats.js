@@ -37,14 +37,30 @@ module.exports = class extends Command {
 
       const name = stats.omega?.name_history?.[0] || "Unknown";
       const s = stats.game?.dayz || {};
-      const playtime = s.playtime
-        ? `${Math.floor(s.playtime / 3600)}h ${Math.floor((s.playtime % 3600) / 60)}m`
+
+      // Kills can be a nested object { pve, pvp, environment } or a flat number
+      let killsDisplay = "N/A";
+      if (s.kills !== undefined && s.kills !== null) {
+        if (typeof s.kills === "object") {
+          const pve = s.kills.pve ?? 0;
+          const pvp = s.kills.pvp ?? 0;
+          const env = s.kills.environment ?? 0;
+          killsDisplay = `${pve + pvp + env} (PvP: ${pvp}, PvE: ${pve}, Env: ${env})`;
+        } else {
+          killsDisplay = s.kills;
+        }
+      }
+
+      // Playtime may be in omega (overall) rather than game.dayz
+      const playtimeSeconds = s.playtime || stats.omega?.playtime || null;
+      const playtime = playtimeSeconds
+        ? `${Math.floor(playtimeSeconds / 3600)}h ${Math.floor((playtimeSeconds % 3600) / 60)}m`
         : "N/A";
 
       await interaction.followUp([
         `**Player Stats — ${name}**`,
         `Steam64: \`${steam64id}\``,
-        `Kills: ${s.kills ?? "N/A"}`,
+        `Kills: ${killsDisplay}`,
         `Deaths: ${s.deaths ?? "N/A"}`,
         `K/D: ${s.kdratio ?? "N/A"}`,
         `Playtime: ${playtime}`,
