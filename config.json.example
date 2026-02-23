@@ -3,18 +3,19 @@
   "guildId": "<DISCORDSERVER-ID>",
   "clientId": "<DISCORD-APP-CLIENTID>",
   "roles": {
-    "whitelisted": "<ID>",
-    "eventManager": "<ID>",
-    "support": "<ID>",
-    "mod": "<ID>",
-    "admin": "<ID>",
-    "seniorAdmin": "<ID>",
-    "owner": "<ID>"
-  }
+    "whitelisted": "<ROLE-ID>",
+    "eventManager": "<ROLE-ID>",
+    "support": "<ROLE-ID>",
+    "mod": "<ROLE-ID>",
+    "admin": "<ROLE-ID>",
+    "seniorAdmin": "<ROLE-ID>",
+    "owner": "<ROLE-ID>"
+  },
   "cftools": {
     "serverId": "<CFTOOLS-SERVERID>",
     "appId": "<CFTOOLS-APPID>",
     "appSecret": "<CFTOOLS-APPSECRET>",
     "banlist": "<CFTOOLS-BANLISTID>"
   }
+}
 }
