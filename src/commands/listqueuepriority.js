@@ -11,43 +11,38 @@ module.exports = class extends Command {
     });
   }
 
-  /**
-   * @param {Command.Registry} registry
-   */
   async registerApplicationCommands(registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName(this.name)
-        .setDescription(this.description)
-        .setDMPermission(false)
+    registry.registerChatInputCommand(
+      (builder) =>
+        builder
+          .setName(this.name)
+          .setDescription(this.description)
+          .setDMPermission(false),
+      { guildIds: [config.guildId] }
     );
   }
 
-  /**
-   * @param {Command.ChatInputInteraction} interaction
-   */
   async chatInputRun(interaction) {
     if (!interaction.member.roles.cache.has(config.moderatorRole))
-      return interaction.reply(
-        "You don't have permission to use this command."
-      );
-    
+      return interaction.reply("You don't have permission to use this command.");
+
     await interaction.deferReply();
 
     try {
       const entries = await api.getQueuePriority();
-      
+
       if (!entries || entries.length === 0) {
         return await interaction.followUp("No queue priority entries found.");
       }
 
-      const formattedEntries = entries.map(entry => {
-        const expiryText = entry.expires_at 
-          ? `Expires: <t:${parseInt(new Date(entry.expires_at).getTime() / 1000)}:f>`
-          : "Permanent";
-          
-        return `Player: \`${entry.cftools_id}\`\nComment: ${entry.comment}\n${expiryText}\n`;
-      }).join("\n");
+      const formattedEntries = entries
+        .map((entry) => {
+          const expiryText = entry.expires_at
+            ? `Expires: <t:${parseInt(new Date(entry.expires_at).getTime() / 1000)}:f>`
+            : "Permanent";
+          return `Player: \`${entry.cftools_id}\`\nComment: ${entry.comment}\n${expiryText}\n`;
+        })
+        .join("\n");
 
       await interaction.followUp(`**Queue Priority List**\n\n${formattedEntries}`);
     } catch (e) {
