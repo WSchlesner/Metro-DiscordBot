@@ -34,7 +34,7 @@ const api = {
   putWhitelist: (...args) => client.putWhitelist(...args),
   deleteWhitelist: (...args) => client.deleteWhitelist(...args),
 
-  // Lookup a user by CFTools ID to get Steam info
+  // Lookup a user by CFTools ID
   async lookupUser(cftools_id) {
     const token = await getToken();
     const response = await fetch(
@@ -48,6 +48,25 @@ const api = {
     );
     if (!response.ok) return null;
     const data = await response.json();
+    return data;
+  },
+
+  // Get player profile from CFTools
+  async getPlayerProfile(cftools_id) {
+    const token = await getToken();
+    const response = await fetch(
+      `${BASE_URL}/v2/server/${cftools.queuePriorityServerId}/player?cftools_id=${cftools_id}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "User-Agent": cftools.appId
+        }
+      }
+    );
+    console.log("Player profile status:", response.status);
+    if (!response.ok) return null;
+    const data = await response.json();
+    console.log("Player profile data:", JSON.stringify(data, null, 2));
     return data;
   },
 

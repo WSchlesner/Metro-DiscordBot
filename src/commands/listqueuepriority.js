@@ -41,9 +41,9 @@ module.exports = class extends Command {
         return await interaction.followUp("No queue priority entries found.");
       }
 
-      // Temporary test - log what the lookup returns
-      const testLookup = await api.lookupUser(entries[0].user.cftools_id);
-      console.log("Lookup result:", JSON.stringify(testLookup, null, 2));
+      // Test player profile lookup on first entry
+      const testProfile = await api.getPlayerProfile(entries[0].user.cftools_id);
+      console.log("Profile result:", JSON.stringify(testProfile, null, 2));
 
       const page = interaction.options.getInteger("page") || 1;
       const perPage = 10;
@@ -60,7 +60,7 @@ module.exports = class extends Command {
           const expiryText = entry.meta.expiration
             ? `Expires: <t:${parseInt(new Date(entry.meta.expiration).getTime() / 1000)}:f>`
             : "Permanent";
-          return `Player: \`${entry.user.cftools_id}\`\nComment: ${entry.meta.comment || "None"}\n${expiryText}`;
+          return `Player: [${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id})\nComment: ${entry.meta.comment || "None"}\n${expiryText}`;
         })
         .join("\n\n");
 
