@@ -37,36 +37,44 @@ module.exports = class extends Command {
 
       const name = stats.omega?.name_history?.[0] || "Unknown";
       const s = stats.game?.dayz || {};
+      const kills = s.kills || {};
+      const shots = s.shots || {};
 
-      // Kills can be a nested object { pve, pvp, environment } or a flat number
-      let killsDisplay = "N/A";
-      if (s.kills !== undefined && s.kills !== null) {
-        if (typeof s.kills === "object") {
-          const pve = s.kills.pve ?? 0;
-          const pvp = s.kills.pvp ?? 0;
-          const env = s.kills.environment ?? 0;
-          killsDisplay = `${pve + pvp + env} (PvP: ${pvp}, PvE: ${pve}, Env: ${env})`;
-        } else {
-          killsDisplay = s.kills;
-        }
-      }
-
-      // Playtime may be in omega (overall) rather than game.dayz
-      const playtimeSeconds = s.playtime || stats.omega?.playtime || null;
+      const playtimeSeconds = stats.omega?.playtime || 0;
       const playtime = playtimeSeconds
         ? `${Math.floor(playtimeSeconds / 3600)}h ${Math.floor((playtimeSeconds % 3600) / 60)}m`
+        : "N/A";
+
+      const distanceKm = s.distance_traveled
+        ? `${(s.distance_traveled / 1000).toFixed(1)} km`
+        : "N/A";
+
+      const shotAccuracy = shots.fired
+        ? `${shots.fired.toLocaleString()} (${((shots.hit / shots.fired) * 100).toFixed(1)}%)`
         : "N/A";
 
       await interaction.followUp([
         `**Player Stats — ${name}**`,
         `Steam64: \`${steam64id}\``,
-        `Kills: ${killsDisplay}`,
+        ``,
+        `**Combat**`,
+        `Players Killed: ${kills.players ?? "N/A"}`,
+        `AI Killed: ${(kills.infected ?? 0) + (kills.animals ?? 0)}`,
         `Deaths: ${s.deaths ?? "N/A"}`,
-        `K/D: ${s.kdratio ?? "N/A"}`,
+        `K/D Ratio: ${s.kdratio ?? "N/A"}`,
+        `Suicides: ${s.suicides ?? "N/A"}`,
+        ``,
+        `**Shooting**`,
+        `Shots Fired: ${shots.fired?.toLocaleString() ?? "N/A"}`,
+        `Accuracy: ${shots.fired ? `${((shots.hit / shots.fired) * 100).toFixed(1)}%` : "N/A"}`,
+        `Furthest Kill: ${s.longest_kill ?? "N/A"}m`,
+        `Furthest Shot: ${s.longest_shot ?? "N/A"}m`,
+        ``,
+        `**General**`,
         `Playtime: ${playtime}`,
-        `Longest Kill: ${s.longest_kill ?? "N/A"}m`,
-        `Longest Shot: ${s.longest_shot ?? "N/A"}m`,
-        `Suicides: ${s.suicides ?? "N/A"}`
+        `Sessions: ${stats.omega?.sessions ?? "N/A"}`,
+        `Distance Traveled: ${distanceKm}`,
+        `Environment Deaths: ${s.environment_deaths ?? "N/A"}`
       ].join("\n"));
     } catch (e) {
       return await interaction.followUp(`Error: ${e.message}`);
