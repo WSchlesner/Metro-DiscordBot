@@ -9,6 +9,7 @@
     "mod": "<ROLE-ID>",
     "admin": "<ROLE-ID>",
     "seniorAdmin": "<ROLE-ID>",
+    "manager": "<ROLE-ID>",
     "owner": "<ROLE-ID>"
   },
   "cftools": {

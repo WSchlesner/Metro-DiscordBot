@@ -8,6 +8,7 @@ const ROLE_HIERARCHY = [
   "mod",
   "admin",
   "seniorAdmin",
+  "manager",
   "owner"
 ];
 
