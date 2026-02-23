@@ -41,10 +41,6 @@ module.exports = class extends Command {
         return await interaction.followUp("No queue priority entries found.");
       }
 
-      // Test player profile lookup on first entry
-      const testProfile = await api.getPlayerProfile(entries[0].user.cftools_id);
-      console.log("Profile result:", JSON.stringify(testProfile, null, 2));
-
       const page = interaction.options.getInteger("page") || 1;
       const perPage = 10;
       const totalPages = Math.ceil(entries.length / perPage);
@@ -52,15 +48,32 @@ module.exports = class extends Command {
       const pageEntries = entries.slice(start, start + perPage);
 
       if (page > totalPages) {
-        return await interaction.followUp(`Invalid page. There are only ${totalPages} pages.`);
+        return await interaction.followUp(
+          `Invalid page. There are only ${totalPages} pages.`
+        );
       }
 
+      // Resolve player profiles for this page in parallel
+      const profiles = await Promise.all(
+        pageEntries.map((entry) =>
+          api.getPlayerProfile(entry.user.cftools_id).catch(() => null)
+        )
+      );
+
       const formattedEntries = pageEntries
-        .map((entry) => {
+        .map((entry, i) => {
+          const profile = profiles[i];
+          const name = profile?.name || "Unknown";
+          const steam64 = profile?.steam64;
+          const playerDisplay = steam64
+            ? `${name} ([${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id})) | Steam: \`${steam64}\``
+            : `${name} ([${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id}))`;
           const expiryText = entry.meta.expiration
-            ? `Expires: <t:${parseInt(new Date(entry.meta.expiration).getTime() / 1000)}:f>`
+            ? `Expires: <t:${parseInt(
+                new Date(entry.meta.expiration).getTime() / 1000
+              )}:f>`
             : "Permanent";
-          return `Player: [${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id})\nComment: ${entry.meta.comment || "None"}\n${expiryText}`;
+          return `**${name}**\nCFTools: [${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id})${steam64 ? `\nSteam64: \`${steam64}\`` : ""}\nComment: ${entry.meta.comment || "None"}\n${expiryText}`;
         })
         .join("\n\n");
 
