@@ -1,5 +1,4 @@
 const { Command } = require("@sapphire/framework");
-const { SteamId64 } = require("cftools-sdk");
 const api = require("../api.js");
 const config = require("../../config.json");
 
@@ -22,7 +21,7 @@ module.exports = class extends Command {
           .addStringOption((option) =>
             option
               .setName("steam64id")
-              .setDescription("ID of the player to remove queue priority from")
+              .setDescription("Steam64 ID of the player to remove queue priority from")
               .setRequired(true)
           ),
       { guildIds: [config.guildId] }
@@ -37,9 +36,10 @@ module.exports = class extends Command {
     const steam64id = interaction.options.getString("steam64id", true);
 
     try {
-      await api.deleteQueuePriority({
-        cftools_id: SteamId64.of(steam64id),
-      });
+      // Resolve Steam64 to CFTools ID first
+      const cftools_id = await api.lookupCFToolsId(steam64id);
+
+      await api.deleteQueuePriority({ cftools_id });
     } catch (e) {
       if (e?.message.startsWith("ResourceNotFound")) {
         return await interaction.followUp("Player not found or has no queue priority.");

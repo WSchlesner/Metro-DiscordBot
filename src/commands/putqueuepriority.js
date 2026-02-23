@@ -1,5 +1,4 @@
 const { Command } = require("@sapphire/framework");
-const { SteamId64 } = require("cftools-sdk");
 const api = require("../api.js");
 const config = require("../../config.json");
 
@@ -22,7 +21,7 @@ module.exports = class extends Command {
           .addStringOption((option) =>
             option
               .setName("steam64id")
-              .setDescription("ID of the player to give queue priority")
+              .setDescription("Steam64 ID of the player to give queue priority")
               .setRequired(true)
           )
           .addStringOption((option) =>
@@ -57,25 +56,25 @@ module.exports = class extends Command {
     const steam64id = interaction.options.getString("steam64id", true);
     const comment = interaction.options.getString("comment", true);
     const duration = interaction.options.getInteger("duration", false);
-    const expires_at = duration ? new Date(Date.now() + duration) : null;
+    const expires_at = duration ? new Date(Date.now() + duration).toISOString() : null;
 
     try {
+      // Resolve Steam64 to CFTools ID first
+      const cftools_id = await api.lookupCFToolsId(steam64id);
+
       await api.putQueuePriority({
-        cftools_id: SteamId64.of(steam64id),
+        cftools_id,
         comment,
         expires_at
       });
     } catch (e) {
-      if (e?.message.startsWith("ResourceNotFound")) {
-        return await interaction.followUp("Player not found.");
-      }
       return await interaction.followUp(`Error: ${e.message}`);
     }
 
     await interaction.followUp(
       `Added queue priority for \`${steam64id}\` ${
         expires_at
-          ? `until <t:${parseInt(expires_at.getTime() / 1000)}:f>`
+          ? `until <t:${parseInt(new Date(expires_at).getTime() / 1000)}:f>`
           : "permanently"
       }.`
     );

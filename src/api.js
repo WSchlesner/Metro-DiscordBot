@@ -34,6 +34,28 @@ const api = {
   putWhitelist: (...args) => client.putWhitelist(...args),
   deleteWhitelist: (...args) => client.deleteWhitelist(...args),
 
+  // Lookup CFTools ID from Steam64 ID
+  async lookupCFToolsId(steam64) {
+    const token = await getToken();
+    const response = await fetch(
+      `${BASE_URL}/v1/users/lookup?identifier=${steam64}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "User-Agent": cftools.appId
+        }
+      }
+    );
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `CFTools lookup error: ${response.status}`);
+    }
+    const data = await response.json();
+    const cftoolsId = data.cftools_id;
+    if (!cftoolsId) throw new Error("Could not resolve Steam64 ID to CFTools ID. Has this player joined the server before?");
+    return cftoolsId;
+  },
+
   // Get player profile by CFTools ID
   async getPlayerProfile(cftools_id) {
     const token = await getToken();
@@ -75,6 +97,12 @@ const api = {
 
   async putQueuePriority({ cftools_id, comment, expires_at = null }) {
     const token = await getToken();
+    const body = {
+      cftools_id,
+      comment,
+      expires_at
+    };
+    console.log("putQueuePriority body:", JSON.stringify(body));
     const response = await fetch(
       `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
       {
@@ -84,15 +112,13 @@ const api = {
           "Content-Type": "application/json",
           "User-Agent": cftools.appId
         },
-        body: JSON.stringify({
-          cftools_id: cftools_id.toString(),
-          comment,
-          expires_at
-        })
+        body: JSON.stringify(body)
       }
     );
+    const responseText = await response.text();
+    console.log("putQueuePriority response:", response.status, responseText);
     if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
+      const err = JSON.parse(responseText || "{}");
       throw new Error(err.error || `CFTools API error: ${response.status}`);
     }
   },
@@ -108,9 +134,7 @@ const api = {
           "Content-Type": "application/json",
           "User-Agent": cftools.appId
         },
-        body: JSON.stringify({
-          cftools_id: cftools_id.toString()
-        })
+        body: JSON.stringify({ cftools_id })
       }
     );
     if (!response.ok) {
