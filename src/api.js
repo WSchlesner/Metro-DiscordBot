@@ -34,22 +34,39 @@ const api = {
   putWhitelist: (...args) => client.putWhitelist(...args),
   deleteWhitelist: (...args) => client.deleteWhitelist(...args),
 
+  // Lookup a user by CFTools ID to get Steam info
+  async lookupUser(cftools_id) {
+    const token = await getToken();
+    const response = await fetch(
+      `${BASE_URL}/v1/users/lookup?identifier=${cftools_id}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "User-Agent": cftools.appId
+        }
+      }
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data;
+  },
+
   // Queue Priority - direct REST API calls
   async getQueuePriority() {
-  const token = await getToken();
-  const response = await fetch(
-    `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
-    {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "User-Agent": cftools.appId
+    const token = await getToken();
+    const response = await fetch(
+      `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "User-Agent": cftools.appId
+        }
       }
-    }
-  );
-  if (!response.ok) throw new Error(`CFTools API error: ${response.status}`);
-  const data = await response.json();
-  return data.entries || [];
-},
+    );
+    if (!response.ok) throw new Error(`CFTools API error: ${response.status}`);
+    const data = await response.json();
+    return data.entries || [];
+  },
 
   async putQueuePriority({ cftools_id, comment, expires_at = null }) {
     const token = await getToken();

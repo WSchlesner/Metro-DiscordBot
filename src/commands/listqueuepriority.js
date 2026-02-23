@@ -41,6 +41,10 @@ module.exports = class extends Command {
         return await interaction.followUp("No queue priority entries found.");
       }
 
+      // Temporary test - log what the lookup returns
+      const testLookup = await api.lookupUser(entries[0].user.cftools_id);
+      console.log("Lookup result:", JSON.stringify(testLookup, null, 2));
+
       const page = interaction.options.getInteger("page") || 1;
       const perPage = 10;
       const totalPages = Math.ceil(entries.length / perPage);
