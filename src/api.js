@@ -36,20 +36,25 @@ const api = {
 
   // Queue Priority - direct REST API calls
   async getQueuePriority() {
-    const token = await getToken();
-    const response = await fetch(
-      `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
-      {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "User-Agent": cftools.appId
-        }
+  const token = await getToken();
+  const response = await fetch(
+    `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
+    {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "User-Agent": cftools.appId
       }
-    );
-    if (!response.ok) throw new Error(`CFTools API error: ${response.status}`);
-    const text = await response.text();
-    return text.trim().split("\n").filter(Boolean).map(line => JSON.parse(line));
-  },
+    }
+  );
+  
+  console.log("Status:", response.status);
+  console.log("Headers:", Object.fromEntries(response.headers));
+  const text = await response.text();
+  console.log("Raw response:", text);
+  
+  if (!response.ok) throw new Error(`CFTools API error: ${response.status}`);
+  return text.trim().split("\n").filter(Boolean).map(line => JSON.parse(line));
+},
 
   async putQueuePriority({ cftools_id, comment, expires_at = null }) {
     const token = await getToken();
