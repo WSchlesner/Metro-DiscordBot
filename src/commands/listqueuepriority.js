@@ -35,14 +35,14 @@ module.exports = class extends Command {
         return await interaction.followUp("No queue priority entries found.");
       }
 
-      const formattedEntries = entries
-        .map((entry) => {
-          const expiryText = entry.expires_at
-            ? `Expires: <t:${parseInt(new Date(entry.expires_at).getTime() / 1000)}:f>`
-            : "Permanent";
-          return `Player: \`${entry.cftools_id}\`\nComment: ${entry.comment}\n${expiryText}\n`;
-        })
-        .join("\n");
+        const formattedEntries = entries
+          .map((entry) => {
+            const expiryText = entry.meta.expiration
+              ? `Expires: <t:${parseInt(new Date(entry.meta.expiration).getTime() / 1000)}:f>`
+              : "Permanent";
+            return `Player: \`${entry.user.cftools_id}\`\nComment: ${entry.meta.comment || "None"}\n${expiryText}\n`;
+          })
+          .join("\n");
 
       await interaction.followUp(`**Queue Priority List**\n\n${formattedEntries}`);
     } catch (e) {

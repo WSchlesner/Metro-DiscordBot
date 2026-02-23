@@ -46,14 +46,9 @@ const api = {
       }
     }
   );
-  
-  console.log("Status:", response.status);
-  console.log("Headers:", Object.fromEntries(response.headers));
-  const text = await response.text();
-  console.log("Raw response:", text);
-  
   if (!response.ok) throw new Error(`CFTools API error: ${response.status}`);
-  return text.trim().split("\n").filter(Boolean).map(line => JSON.parse(line));
+  const data = await response.json();
+  return data.entries || [];
 },
 
   async putQueuePriority({ cftools_id, comment, expires_at = null }) {
