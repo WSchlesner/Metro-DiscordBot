@@ -12,32 +12,27 @@ module.exports = class extends Command {
     });
   }
 
-  /**
-   * @param {Command.Registry} registry
-   */
   async registerApplicationCommands(registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName(this.name)
-        .setDescription(this.description)
-        .setDMPermission(false)
-        .addStringOption((option) =>
-          option
-            .setName("steam64id")
-            .setDescription("ID of the player to delete from the ban list")
-            .setRequired(true)
-        )
+    registry.registerChatInputCommand(
+      (builder) =>
+        builder
+          .setName(this.name)
+          .setDescription(this.description)
+          .setDMPermission(false)
+          .addStringOption((option) =>
+            option
+              .setName("steam64id")
+              .setDescription("ID of the player to delete from the ban list")
+              .setRequired(true)
+          ),
+      { guildIds: [config.guildId] }
     );
   }
 
-  /**
-   * @param {Command.ChatInputInteraction} interaction
-   */
   async chatInputRun(interaction) {
     if (!interaction.member.roles.cache.has(config.moderatorRole))
-      return interaction.reply(
-        "You don't have permission to use this command."
-      );
+      return interaction.reply("You don't have permission to use this command.");
+
     await interaction.deferReply();
     const steam64id = interaction.options.getString("steam64id", true);
 
