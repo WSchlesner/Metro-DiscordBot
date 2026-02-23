@@ -5,7 +5,7 @@ const config = require("../../config.json");
 
 module.exports = class extends Command {
   constructor(context, options) {
-    super(context, { ...options, name: "whitelist", description: "Add a player to the whitelist" });
+    super(context, { ...options, name: "messageserver", description: "Send a public message to the server" });
   }
 
   async registerApplicationCommands(registry) {
@@ -16,27 +16,25 @@ module.exports = class extends Command {
           .setDescription(this.description)
           .setDMPermission(false)
           .addStringOption((option) =>
-            option.setName("steam64id").setDescription("Steam64 ID of the player").setRequired(true)
-          )
-          .addStringOption((option) =>
-            option.setName("comment").setDescription("Comment for this entry").setRequired(true)
+            option.setName("message").setDescription("Message to send (max 256 characters)").setRequired(true)
           ),
       { guildIds: [config.guildId] }
     );
   }
 
   async chatInputRun(interaction) {
-    if (!hasRole(interaction.member, "support"))
+    if (!hasRole(interaction.member, "eventManager"))
       return interaction.reply({ content: "You don't have permission to use this command.", ephemeral: true });
 
     await interaction.deferReply();
-    const steam64id = interaction.options.getString("steam64id", true);
-    const comment = interaction.options.getString("comment", true);
+    const content = interaction.options.getString("message", true);
+
+    if (content.length > 256)
+      return await interaction.followUp("Message too long. Maximum 256 characters.");
 
     try {
-      const cftools_id = await api.lookupCFToolsId(steam64id);
-      await api.createWhitelistEntry({ cftools_id, comment });
-      await interaction.followUp(`Added \`${steam64id}\` to the whitelist.`);
+      await api.messageServer({ content });
+      await interaction.followUp(`Message sent to server: *${content}*`);
     } catch (e) {
       return await interaction.followUp(`Error: ${e.message}`);
     }

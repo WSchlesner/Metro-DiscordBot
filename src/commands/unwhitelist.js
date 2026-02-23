@@ -1,15 +1,11 @@
 const { Command } = require("@sapphire/framework");
-const { SteamId64 } = require("cftools-sdk");
 const api = require("../api.js");
+const { hasRole } = require("../lib/roles.js");
 const config = require("../../config.json");
 
 module.exports = class extends Command {
   constructor(context, options) {
-    super(context, {
-      ...options,
-      name: "unwhitelist",
-      description: "Delete a player from the whitelist",
-    });
+    super(context, { ...options, name: "unwhitelist", description: "Remove a player from the whitelist" });
   }
 
   async registerApplicationCommands(registry) {
@@ -20,31 +16,25 @@ module.exports = class extends Command {
           .setDescription(this.description)
           .setDMPermission(false)
           .addStringOption((option) =>
-            option
-              .setName("steam64id")
-              .setDescription("ID of the player to delete from the whitelist")
-              .setRequired(true)
+            option.setName("steam64id").setDescription("Steam64 ID of the player").setRequired(true)
           ),
       { guildIds: [config.guildId] }
     );
   }
 
   async chatInputRun(interaction) {
-    if (!interaction.member.roles.cache.has(config.moderatorRole))
-      return interaction.reply("You don't have permission to use this command.");
+    if (!hasRole(interaction.member, "support"))
+      return interaction.reply({ content: "You don't have permission to use this command.", ephemeral: true });
 
     await interaction.deferReply();
     const steam64id = interaction.options.getString("steam64id", true);
 
     try {
-      await api.deleteWhitelist(SteamId64.of(steam64id));
+      const cftools_id = await api.lookupCFToolsId(steam64id);
+      await api.deleteWhitelistEntry({ cftools_id });
+      await interaction.followUp(`Removed \`${steam64id}\` from the whitelist.`);
     } catch (e) {
-      if (e?.message.startsWith("ResourceNotFound")) {
-        return await interaction.followUp("Player not found.");
-      }
       return await interaction.followUp(`Error: ${e.message}`);
     }
-
-    await interaction.followUp(`Deleted \`${steam64id}\` from the whitelist.`);
   }
 };

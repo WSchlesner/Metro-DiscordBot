@@ -5,7 +5,7 @@ const config = require("../../config.json");
 
 module.exports = class extends Command {
   constructor(context, options) {
-    super(context, { ...options, name: "whitelist", description: "Add a player to the whitelist" });
+    super(context, { ...options, name: "getwhitelist", description: "Check if a player is whitelisted" });
   }
 
   async registerApplicationCommands(registry) {
@@ -16,10 +16,7 @@ module.exports = class extends Command {
           .setDescription(this.description)
           .setDMPermission(false)
           .addStringOption((option) =>
-            option.setName("steam64id").setDescription("Steam64 ID of the player").setRequired(true)
-          )
-          .addStringOption((option) =>
-            option.setName("comment").setDescription("Comment for this entry").setRequired(true)
+            option.setName("steam64id").setDescription("Steam64 ID to check").setRequired(true)
           ),
       { guildIds: [config.guildId] }
     );
@@ -31,12 +28,24 @@ module.exports = class extends Command {
 
     await interaction.deferReply();
     const steam64id = interaction.options.getString("steam64id", true);
-    const comment = interaction.options.getString("comment", true);
 
     try {
       const cftools_id = await api.lookupCFToolsId(steam64id);
-      await api.createWhitelistEntry({ cftools_id, comment });
-      await interaction.followUp(`Added \`${steam64id}\` to the whitelist.`);
+      const entries = await api.getWhitelistEntry(cftools_id);
+
+      if (!entries.length)
+        return await interaction.followUp(`\`${steam64id}\` is **not** whitelisted.`);
+
+      const entry = entries[0];
+      const expiryText = entry.meta?.expiration
+        ? `Expires: <t:${parseInt(new Date(entry.meta.expiration).getTime() / 1000)}:f>`
+        : "Permanent";
+
+      await interaction.followUp([
+        `\`${steam64id}\` is **whitelisted**.`,
+        `Comment: ${entry.meta?.comment || "None"}`,
+        expiryText
+      ].join("\n"));
     } catch (e) {
       return await interaction.followUp(`Error: ${e.message}`);
     }

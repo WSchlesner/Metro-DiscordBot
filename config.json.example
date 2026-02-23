@@ -1,8 +1,16 @@
 {
   "token": "<DISCORD-APP-TOKEN>",
-  "moderatorRole": "<DISCORDROLE-ID>",
   "guildId": "<DISCORDSERVER-ID>",
   "clientId": "<DISCORD-APP-CLIENTID>",
+  "roles": {
+    "whitelisted": "<ID>",
+    "eventManager": "<ID>",
+    "support": "<ID>",
+    "mod": "<ID>",
+    "admin": "<ID>",
+    "seniorAdmin": "<ID>",
+    "owner": "<ID>"
+  }
   "cftools": {
     "serverId": "<CFTOOLS-SERVERID>",
     "appId": "<CFTOOLS-APPID>",

@@ -1,15 +1,11 @@
 const { Command } = require("@sapphire/framework");
-const { SteamId64, Banlist } = require("cftools-sdk");
 const api = require("../api.js");
+const { hasRole } = require("../lib/roles.js");
 const config = require("../../config.json");
 
 module.exports = class extends Command {
   constructor(context, options) {
-    super(context, {
-      ...options,
-      name: "ban",
-      description: "Put a player on the ban list",
-    });
+    super(context, { ...options, name: "ban", description: "Issue a temporary ban" });
   }
 
   async registerApplicationCommands(registry) {
@@ -20,36 +16,20 @@ module.exports = class extends Command {
           .setDescription(this.description)
           .setDMPermission(false)
           .addStringOption((option) =>
-            option
-              .setName("steam64id")
-              .setDescription("ID of the player to put on the ban list")
-              .setRequired(true)
+            option.setName("steam64id").setDescription("Steam64 ID of the player").setRequired(true)
           )
           .addStringOption((option) =>
-            option
-              .setName("reason")
-              .setDescription("Reason for the ban")
-              .setRequired(true)
+            option.setName("reason").setDescription("Reason for the ban").setRequired(true)
           )
           .addIntegerOption((option) =>
-            option
-              .setName("duration")
-              .setDescription("Duration of the ban")
-              .setRequired(false)
+            option.setName("duration").setDescription("Ban duration").setRequired(true)
               .setChoices(
-                { name: "5 minutes", value: 5 * 60 * 1000 },
-                { name: "10 minutes", value: 10 * 60 * 1000 },
-                { name: "15 minutes", value: 15 * 60 * 1000 },
-                { name: "30 minutes", value: 30 * 60 * 1000 },
                 { name: "1 hour", value: 60 * 60 * 1000 },
                 { name: "3 hours", value: 3 * 60 * 60 * 1000 },
-                { name: "5 hours", value: 5 * 60 * 60 * 1000 },
+                { name: "6 hours", value: 6 * 60 * 60 * 1000 },
                 { name: "12 hours", value: 12 * 60 * 60 * 1000 },
                 { name: "1 day", value: 24 * 60 * 60 * 1000 },
-                { name: "3 days", value: 3 * 24 * 60 * 60 * 1000 },
-                { name: "5 days", value: 5 * 24 * 60 * 60 * 1000 },
-                { name: "1 week", value: 7 * 24 * 60 * 60 * 1000 },
-                { name: "10 days", value: 10 * 24 * 60 * 60 * 1000 }
+                { name: "3 days", value: 3 * 24 * 60 * 60 * 1000 }
               )
           ),
       { guildIds: [config.guildId] }
@@ -57,35 +37,23 @@ module.exports = class extends Command {
   }
 
   async chatInputRun(interaction) {
-    if (!interaction.member.roles.cache.has(config.moderatorRole))
-      return interaction.reply("You don't have permission to use this command.");
+    if (!hasRole(interaction.member, "mod"))
+      return interaction.reply({ content: "You don't have permission to use this command.", ephemeral: true });
 
     await interaction.deferReply();
     const steam64id = interaction.options.getString("steam64id", true);
     const reason = interaction.options.getString("reason", true);
-    const duration = interaction.options.getInteger("duration", false);
-    const expiration = duration ? new Date(Date.now() + duration) : "Permanent";
+    const duration = interaction.options.getInteger("duration", true);
+    const expires_at = new Date(Date.now() + duration).toISOString();
 
     try {
-      await api.putBan({
-        playerId: SteamId64.of(steam64id),
-        list: Banlist.of(config.cftools.banlist),
-        reason,
-        expiration,
-      });
+      const cftools_id = await api.lookupCFToolsId(steam64id);
+      await api.issueBan({ cftools_id, reason, expires_at });
+      await interaction.followUp(
+        `Banned \`${steam64id}\` until <t:${parseInt(new Date(expires_at).getTime() / 1000)}:f>. Reason: ${reason}`
+      );
     } catch (e) {
-      if (e?.message.startsWith("ResourceNotFound")) {
-        return await interaction.followUp("Player not found.");
-      }
       return await interaction.followUp(`Error: ${e.message}`);
     }
-
-    await interaction.followUp(
-      `Banned \`${steam64id}\` ${
-        expiration === "Permanent"
-          ? "permanently"
-          : `until <t:${parseInt(expiration.getTime() / 1000)}:f>`
-      }.`
-    );
   }
 };

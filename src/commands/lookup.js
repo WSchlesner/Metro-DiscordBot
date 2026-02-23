@@ -5,7 +5,7 @@ const config = require("../../config.json");
 
 module.exports = class extends Command {
   constructor(context, options) {
-    super(context, { ...options, name: "whitelist", description: "Add a player to the whitelist" });
+    super(context, { ...options, name: "lookup", description: "Look up a player in the CFTools database" });
   }
 
   async registerApplicationCommands(registry) {
@@ -17,26 +17,29 @@ module.exports = class extends Command {
           .setDMPermission(false)
           .addStringOption((option) =>
             option.setName("steam64id").setDescription("Steam64 ID of the player").setRequired(true)
-          )
-          .addStringOption((option) =>
-            option.setName("comment").setDescription("Comment for this entry").setRequired(true)
           ),
       { guildIds: [config.guildId] }
     );
   }
 
   async chatInputRun(interaction) {
-    if (!hasRole(interaction.member, "support"))
+    if (!hasRole(interaction.member, "admin"))
       return interaction.reply({ content: "You don't have permission to use this command.", ephemeral: true });
 
     await interaction.deferReply();
     const steam64id = interaction.options.getString("steam64id", true);
-    const comment = interaction.options.getString("comment", true);
 
     try {
       const cftools_id = await api.lookupCFToolsId(steam64id);
-      await api.createWhitelistEntry({ cftools_id, comment });
-      await interaction.followUp(`Added \`${steam64id}\` to the whitelist.`);
+      const profile = await api.getPlayerProfile(cftools_id);
+
+      await interaction.followUp([
+        `**Player Lookup**`,
+        `Steam64: \`${steam64id}\``,
+        `CFTools ID: \`${cftools_id}\``,
+        `CFTools Profile: <https://app.cftools.cloud/profile/${cftools_id}>`,
+        `Name: ${profile?.name || "Unknown"}`
+      ].join("\n"));
     } catch (e) {
       return await interaction.followUp(`Error: ${e.message}`);
     }
