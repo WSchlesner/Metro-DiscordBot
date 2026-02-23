@@ -48,20 +48,8 @@ module.exports = class extends Command {
 
       if (!entries.length) return await interaction.followUp("No leaderboard data found.");
 
-      const statLabels = {
-        kills: "Kills", deaths: "Deaths", suicides: "Suicides",
-        playtime: "Playtime", longest_kill: "Longest Kill",
-        longest_shot: "Longest Shot", kdratio: "K/D Ratio"
-      };
-
-      const lines = entries.map((e, i) => {
-        const value = stat === "playtime"
-          ? `${Math.floor(e.value / 3600)}h ${Math.floor((e.value % 3600) / 60)}m`
-          : e.value;
-        return `**${i + 1}.** ${e.latest_name || "Unknown"} — ${value}`;
-      });
-
-      await interaction.followUp(`**Leaderboard — ${statLabels[stat]}**\n\n${lines.join("\n")}`);
+      // Temporary: dump first entry so we can see the shape
+      await interaction.followUp(`\`\`\`json\n${JSON.stringify(entries[0], null, 2)}\n\`\`\``);
     } catch (e) {
       return await interaction.followUp(`Error: ${e.message}`);
     }
