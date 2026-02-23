@@ -1,0 +1,10 @@
+{
+  "token": "<DISCORD-APP-TOKEN>",
+  "moderatorRole": "<DISCORDROLE-ID>",
+  "cftools": {
+    "serverId": "<CFTOOLS-SERVERID>",
+    "appId": "<CFTOOLS-APPID>",
+    "appSecret": "<CFTOOLS-APPSECRET>",
+    "banlist": "<CFTOOLS-BANLISTID>"
+  }
+}
