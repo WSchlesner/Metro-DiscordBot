@@ -64,16 +64,19 @@ module.exports = class extends Command {
         .map((entry, i) => {
           const profile = profiles[i];
           const name = profile?.name || "Unknown";
-          const steam64 = profile?.steam64;
-          const playerDisplay = steam64
-            ? `${name} ([${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id})) | Steam: \`${steam64}\``
-            : `${name} ([${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id}))`;
+          const steam64 = profile?.steam64 || "Unknown";
           const expiryText = entry.meta.expiration
             ? `Expires: <t:${parseInt(
                 new Date(entry.meta.expiration).getTime() / 1000
               )}:f>`
             : "Permanent";
-          return `**${name}**\nCFTools: [${entry.user.cftools_id}](https://app.cftools.cloud/profile/${entry.user.cftools_id})${steam64 ? `\nSteam64: \`${steam64}\`` : ""}\nComment: ${entry.meta.comment || "None"}\n${expiryText}`;
+          return [
+            `**${name}**`,
+            `CFTools: \`${entry.user.cftools_id}\` (<https://app.cftools.cloud/profile/${entry.user.cftools_id}>)`,
+            `Steam64: \`${steam64}\``,
+            `Comment: ${entry.meta.comment || "None"}`,
+            expiryText,
+          ].join("\n");
         })
         .join("\n\n");
 
