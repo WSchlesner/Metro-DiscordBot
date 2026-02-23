@@ -116,7 +116,8 @@ const api = {
     );
     const responseText = await response.text();
     if (!response.ok) {
-      const err = JSON.parse(responseText || "{}").catch?.() ?? {};
+      let err = {};
+      try { err = JSON.parse(responseText); } catch (_) {}
       throw new Error(err.error || `CFTools API error: ${response.status}`);
     }
   },
