@@ -17,7 +17,13 @@ module.exports = class extends Command {
         builder
           .setName(this.name)
           .setDescription(this.description)
-          .setDMPermission(false),
+          .setDMPermission(false)
+          .addIntegerOption((option) =>
+            option
+              .setName("page")
+              .setDescription("Page number (default: 1)")
+              .setRequired(false)
+          ),
       { guildIds: [config.guildId] }
     );
   }
@@ -35,16 +41,28 @@ module.exports = class extends Command {
         return await interaction.followUp("No queue priority entries found.");
       }
 
-        const formattedEntries = entries
-          .map((entry) => {
-            const expiryText = entry.meta.expiration
-              ? `Expires: <t:${parseInt(new Date(entry.meta.expiration).getTime() / 1000)}:f>`
-              : "Permanent";
-            return `Player: \`${entry.user.cftools_id}\`\nComment: ${entry.meta.comment || "None"}\n${expiryText}\n`;
-          })
-          .join("\n");
+      const page = interaction.options.getInteger("page") || 1;
+      const perPage = 10;
+      const totalPages = Math.ceil(entries.length / perPage);
+      const start = (page - 1) * perPage;
+      const pageEntries = entries.slice(start, start + perPage);
 
-      await interaction.followUp(`**Queue Priority List**\n\n${formattedEntries}`);
+      if (page > totalPages) {
+        return await interaction.followUp(`Invalid page. There are only ${totalPages} pages.`);
+      }
+
+      const formattedEntries = pageEntries
+        .map((entry) => {
+          const expiryText = entry.meta.expiration
+            ? `Expires: <t:${parseInt(new Date(entry.meta.expiration).getTime() / 1000)}:f>`
+            : "Permanent";
+          return `Player: \`${entry.user.cftools_id}\`\nComment: ${entry.meta.comment || "None"}\n${expiryText}`;
+        })
+        .join("\n\n");
+
+      await interaction.followUp(
+        `**Queue Priority List** (Page ${page}/${totalPages} — ${entries.length} total)\n\n${formattedEntries}`
+      );
     } catch (e) {
       return await interaction.followUp(`Error: ${e.message}`);
     }
