@@ -60,7 +60,7 @@ const api = {
   async getPlayerProfile(cftools_id) {
     const token = await getToken();
     const response = await fetch(
-      `${BASE_URL}/v2/server/${cftools.queuePriorityServerId}/player?cftools_id=${cftools_id}`,
+      `${BASE_URL}/v2/server/${cftools.serverId}/player?cftools_id=${cftools_id}`,
       {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -82,7 +82,7 @@ const api = {
   async getQueuePriority() {
     const token = await getToken();
     const response = await fetch(
-      `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
+      `${BASE_URL}/v1/server/${cftools.serverId}/queuepriority`,
       {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -103,7 +103,7 @@ const api = {
       expires_at
     };
     const response = await fetch(
-      `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
+      `${BASE_URL}/v1/server/${cftools.serverId}/queuepriority`,
       {
         method: "POST",
         headers: {
@@ -125,7 +125,7 @@ const api = {
   async deleteQueuePriority({ cftools_id }) {
     const token = await getToken();
     const response = await fetch(
-      `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
+      `${BASE_URL}/v1/server/${cftools.serverId}/queuepriority`,
       {
         method: "DELETE",
         headers: {

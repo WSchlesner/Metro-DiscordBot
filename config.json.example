@@ -7,7 +7,6 @@
     "serverId": "<CFTOOLS-SERVERID>",
     "appId": "<CFTOOLS-APPID>",
     "appSecret": "<CFTOOLS-APPSECRET>",
-    "banlist": "<CFTOOLS-BANLISTID>",
-    "queuePriorityServerId": "<CFTOOLS-PrioQueListID>"
+    "banlist": "<CFTOOLS-BANLISTID>"
   }
 }
