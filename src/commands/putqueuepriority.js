@@ -33,9 +33,10 @@ module.exports = class extends Command {
           .addIntegerOption((option) =>
             option
               .setName("duration")
-              .setDescription("Duration of the queue priority (permanent if not set)")
+              .setDescription("Duration of the queue priority (default: Permanent)")
               .setRequired(false)
               .setChoices(
+                { name: "Permanent", value: 0 },
                 { name: "1 day", value: 24 * 60 * 60 * 1000 },
                 { name: "3 days", value: 3 * 24 * 60 * 60 * 1000 },
                 { name: "5 days", value: 5 * 24 * 60 * 60 * 1000 },
@@ -56,10 +57,13 @@ module.exports = class extends Command {
     const steam64id = interaction.options.getString("steam64id", true);
     const comment = interaction.options.getString("comment", true);
     const duration = interaction.options.getInteger("duration", false);
-    const expires_at = duration ? new Date(Date.now() + duration).toISOString() : null;
+
+    // duration === 0 means Permanent was selected, null means no option chosen (also permanent)
+    const expires_at = (duration && duration > 0)
+      ? new Date(Date.now() + duration).toISOString()
+      : null;
 
     try {
-      // Resolve Steam64 to CFTools ID first
       const cftools_id = await api.lookupCFToolsId(steam64id);
 
       await api.putQueuePriority({
