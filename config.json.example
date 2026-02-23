@@ -1,10 +1,13 @@
 {
   "token": "<DISCORD-APP-TOKEN>",
   "moderatorRole": "<DISCORDROLE-ID>",
+  "guildId": "<DISCORDSERVER-ID>",
+  "clientId": "<DISCORD-APP-CLIENTID>",
   "cftools": {
     "serverId": "<CFTOOLS-SERVERID>",
     "appId": "<CFTOOLS-APPID>",
     "appSecret": "<CFTOOLS-APPSECRET>",
-    "banlist": "<CFTOOLS-BANLISTID>"
+    "banlist": "<CFTOOLS-BANLISTID>",
+    "queuePriorityServerId": "<CFTOOLS-PrioQueListID"
   }
 }
