@@ -71,7 +71,7 @@ module.exports = class extends Command {
               )}:f>`
             : "Permanent";
           return [
-            `**${name}**`,
+            `Most Recent Name: **${name}**`,
             `CFTools: \`${entry.user.cftools_id}\` (<https://app.cftools.cloud/profile/${entry.user.cftools_id}>)`,
             `Steam64: \`${steam64}\``,
             `Comment: ${entry.meta.comment || "None"}`,
