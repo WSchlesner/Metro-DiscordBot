@@ -70,6 +70,9 @@ module.exports = class extends Command {
 
       await interaction.followUp(`**Leaderboard — ${statLabels[stat]}**\n\n${lines.join("\n")}`);
     } catch (e) {
+      if (e.message?.toLowerCase().includes("rate-limit") || e.message?.toLowerCase().includes("rate_limit")) {
+        return await interaction.followUp("The CFTools API is rate limited. Please wait a moment and try again.");
+      }
       return await interaction.followUp(`Error: ${e.message}`);
     }
   }
