@@ -8,6 +8,6 @@
     "appId": "<CFTOOLS-APPID>",
     "appSecret": "<CFTOOLS-APPSECRET>",
     "banlist": "<CFTOOLS-BANLISTID>",
-    "queuePriorityServerId": "<CFTOOLS-PrioQueListID"
+    "queuePriorityServerId": "<CFTOOLS-PrioQueListID>"
   }
 }

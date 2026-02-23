@@ -44,14 +44,17 @@ module.exports = class extends Command {
       const page = interaction.options.getInteger("page") || 1;
       const perPage = 10;
       const totalPages = Math.ceil(entries.length / perPage);
-      const start = (page - 1) * perPage;
-      const pageEntries = entries.slice(start, start + perPage);
 
       if (page > totalPages) {
         return await interaction.followUp(
           `Invalid page. There are only ${totalPages} pages.`
         );
       }
+
+      const start = (page - 1) * perPage;
+      const pageEntries = entries.slice(start, start + perPage);
+
+      
 
       // Resolve player profiles for this page in parallel
       const profiles = await Promise.all(

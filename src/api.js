@@ -74,7 +74,7 @@ const api = {
     if (!playerData) return null;
     return {
       name: playerData.omega?.name_history?.[0] || "Unknown",
-      steam64: data.identities?.steam?.steam64 || null
+      steam64: playerData.identities?.steam?.steam64 || null
     };
   },
 
@@ -102,7 +102,6 @@ const api = {
       comment,
       expires_at
     };
-    console.log("putQueuePriority body:", JSON.stringify(body));
     const response = await fetch(
       `${BASE_URL}/v1/server/${cftools.queuePriorityServerId}/queuepriority`,
       {
@@ -116,9 +115,8 @@ const api = {
       }
     );
     const responseText = await response.text();
-    console.log("putQueuePriority response:", response.status, responseText);
     if (!response.ok) {
-      const err = JSON.parse(responseText || "{}");
+      const err = JSON.parse(responseText || "{}").catch?.() ?? {};
       throw new Error(err.error || `CFTools API error: ${response.status}`);
     }
   },

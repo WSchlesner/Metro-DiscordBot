@@ -1,4 +1,4 @@
-const { SapphireClient, container } = require("@sapphire/framework");
+const { SapphireClient } = require("@sapphire/framework");
 const config = require("../config.json");
 
 const client = new SapphireClient({
